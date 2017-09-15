@@ -23,6 +23,17 @@ Just activate it once and check that departments have been well imported in the 
 
 Once the import is done, the plugin is not useful anymore: you can deactivate or delete it.
 
+### Using departments
+
+If you want to create shipping zones based on French departments, do the following:
+
+- in the France country configuration, check "This country has states / provinces " and save
+- in the "Shipping zones management", create as many zones with as many departments as you want
+- in the "Shipping configuration", select the delivery module you want to configure shipping zones for
+- add the new shipping zones previously created to be available for the selected delivery module
+- in the delivery module configuration, configure your prices for each departments zone you've just created
+- be sure not to have conflicts between global France (maybe disable it) and departments
+
 ## Other
 
 If you reactivate the plugin while departments are already imported, nothing will happen (in fact, if any `state` is associated to France country, nothing will happen).

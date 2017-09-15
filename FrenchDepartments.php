@@ -13,6 +13,7 @@
 namespace FrenchDepartments;
 
 use Propel\Runtime\Connection\ConnectionInterface;
+use Thelia\Model\CountryQuery;
 use Thelia\Model\State;
 use Thelia\Model\StateI18n;
 use Thelia\Model\StateQuery;
@@ -30,7 +31,12 @@ class FrenchDepartments extends BaseModule
      */
     public function postActivation(ConnectionInterface $con = null)
     {
-        if (null !== StateQuery::create()->findOneByCountryId(64)) {
+        $franceCountryId = CountryQuery::create()
+            ->filterByIsoalpha3('FRA')
+            ->select('id')
+            ->findOne();
+
+        if (null === $franceCountryId || null !== StateQuery::create()->findOneByCountryId($franceCountryId)) {
             return;
         }
 
@@ -47,7 +53,7 @@ class FrenchDepartments extends BaseModule
             $state = (new State())
                 ->setVisible(1)
                 ->setIsocode($department['isocode'])
-                ->setCountryId(64);
+                ->setCountryId($franceCountryId);
 
             $state->save();
 
