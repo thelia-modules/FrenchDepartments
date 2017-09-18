@@ -17,9 +17,9 @@ Un import à usage unique des départements français, qui seront gérés comme 
 composer require thelia/french-departments-module:~1.0
 ```
 
-### Usage
+### Utilisation
 
-Activez simplement le module une fois et vérifiez que les départements ont bien été importés dans le menu de Configuration `États / Provinces`.
+Activez simplement le module et vérifiez que les départements aient bien été importés dans le menu de Configuration `États / Provinces`.
 
 Une fois l'import effectué, le module n'est plus utile et peut être désactivé ou supprimé.
 
@@ -28,15 +28,15 @@ Une fois l'import effectué, le module n'est plus utile et peut être désactiv�
 Si vous souhaitez créer une nouvelle zone de livraison basée sur les départements français, suivez cette démarche :
 
 - dans la configuration du pays France, cochez "Ce pays possède des états / provinces" et enregistrez
-- dans les "Zones de livraison", créez autants de zones avec autant de départements que vous le souhaitez
-- dans la "Configuration du transport", sélectionnez le module de transport duquel vous voulez configurer les zones de transport
+- dans les "Zones de livraison", créez autant de zones avec autant de départements que vous le souhaitez
+- dans la "Configuration du transport", sélectionnez le module de transport dont vous voulez configurer les zones de livraison
 - ajoutez les zones de livraison précédemment créées pour les rendre disponibles pour le module de livraison choisi
 - dans la configuration du module de livraison, configurez les prix pour chaque zone que vous avez créées
 - assurez-vous de ne pas avoir de conflits entre vos zones de départements et la zone France
 
 ### Autre
 
-Si vous réactivez le module alors que les départements sont déjà importés, rien ne se passera (en réalité, si le pays France a un état associé, rien ne se passera).
+Si vous réactivez le module alors que les départements sont déjà importés, rien ne se passera (en réalité, so le pays France a ne serait-ce qu'un état associé, rien ne se passera).
 
 Les codes ISO des départements français suivent ce format : "FR-XX", mais la base de données ne sauvegarde que 4 caractères. Seul la partie "XX" est donc enregistrée pour gérer cette spécificité.
 
