@@ -13,11 +13,17 @@
 namespace FrenchDepartments;
 
 use Propel\Runtime\Connection\ConnectionInterface;
+use Thelia\Model\Address;
+use Thelia\Model\AddressQuery;
+use Thelia\Model\Country;
+use Thelia\Model\CountryAreaQuery;
 use Thelia\Model\CountryQuery;
 use Thelia\Model\State;
 use Thelia\Model\StateI18n;
 use Thelia\Model\StateQuery;
+use Thelia\Model\TaxRuleCountryQuery;
 use Thelia\Module\BaseModule;
+use TheliaMigrateCountry\Events\MigrateCountryEvent;
 
 class FrenchDepartments extends BaseModule
 {
@@ -57,6 +63,15 @@ class FrenchDepartments extends BaseModule
 
             $state->save();
 
+            $oldCountry = CountryQuery::create()
+                ->filterByHasStates(0)
+                ->filterByIsoalpha2($department['isocode'])
+                ->findOne();
+
+            if (null !== $oldCountry) {
+                 $this->migrateOldCountry($oldCountry, $state, $franceCountryId);
+            }
+
             foreach ($departmentLocales as $locale => $title) {
                 (new StateI18n())
                     ->setId($state->getId())
@@ -65,6 +80,8 @@ class FrenchDepartments extends BaseModule
                     ->save();
             }
         }
+
+        $this->updateAddresses($franceCountryId);
     }
 
     /**
@@ -512,5 +529,121 @@ class FrenchDepartments extends BaseModule
                 'title' => 'Wallis-et-Futuna'
             ],
         ];
+    }
+
+    protected function migrateOldCountry(Country $oldCountry, State $newState, $newCountryId)
+    {
+        AddressQuery::create()
+            ->filterByCountryId($oldCountry->getId())
+            ->update(
+                [
+                    'CountryId' => $newCountryId,
+                    'StateId' => $newState->getId()
+                ]
+            );
+
+        TaxRuleCountryQuery::create()
+            ->filterByCountryId($oldCountry->getId())
+            ->update(
+                [
+                    'CountryId' => $newCountryId,
+                    'StateId' => $newState->getId()
+                ]
+            );
+
+        CountryAreaQuery::create()
+            ->filterByCountryId($oldCountry->getId())
+            ->update(
+                [
+                    'CountryId' => $newCountryId,
+                    'StateId' => $newState->getId()
+                ]
+            );
+
+        $oldCountry->setVisible(0)
+            ->save();
+    }
+
+    protected function updateAddresses($frenchCountryId)
+    {
+        $frenchAddresses = AddressQuery::create()
+            ->filterByCountryId($frenchCountryId)
+            ->find();
+
+        /** @var Address $frenchAddress */
+        foreach ($frenchAddresses as $frenchAddress) {
+            $stateIso = $this->getStateIsoByZipcode($frenchAddress->getZipcode());
+            $state = StateQuery::create()->findOneByIsocode($stateIso);
+            if (null !== $state) {
+                $frenchAddress->setStateId($state->getId());
+                $frenchAddress->save();
+            }
+        }
+    }
+
+    protected function getStateIsoByZipcode($zipcode)
+    {
+        if (20000 <= $zipcode && $zipcode < 21000) {
+            //Corse
+            if ($zipcode < 20200) {
+                return '2A';
+            } else {
+                return '2B';
+            }
+        } elseif (96000 < $zipcode) {
+            //COM
+            if (97501 == $zipcode || 97502 == $zipcode) {
+                return 'PM';
+            }
+
+            if (97701 == $zipcode) {
+                return 'BL';
+            }
+
+            if (97801 == $zipcode) {
+                return 'MF';
+            }
+
+            if (98411 <= $zipcode && $zipcode <= 98415) {
+                return 'TF';
+            }
+
+            if (98611 <= $zipcode && $zipcode <= 98413) {
+                return 'WF';
+            }
+
+            if (98711 <= $zipcode && $zipcode <= 98758) {
+                return 'PF';
+            }
+
+            if (98801 <= $zipcode && $zipcode <= 98833) {
+                return 'NC';
+            }
+
+            if (98901 == $zipcode) {
+                return 'CP';
+            }
+
+            //DOM - TOM
+            switch (true) {
+                case $zipcode < 97200:
+                    return 'GP';
+                    break;
+                case $zipcode < 97300:
+                    return 'MQ';
+                    break;
+                case $zipcode < 97400:
+                    return 'GF';
+                    break;
+                case $zipcode < 97500:
+                    return 'RE';
+                    break;
+                case $zipcode < 97700:
+                    return 'YT';
+                    break;
+            }
+        } else {
+            return substr($zipcode, 0, 2);
+        }
     }
 }
