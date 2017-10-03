@@ -573,7 +573,7 @@ class FrenchDepartments extends BaseModule
         /** @var Address $frenchAddress */
         foreach ($frenchAddresses as $frenchAddress) {
             $stateIso = $this->getStateIsoByZipcode($frenchAddress->getZipcode());
-            $state = StateQuery::create()->findOneByIsocode($stateIso);
+            $state = StateQuery::create()->filterByCountryId($frenchCountryId)->findOneByIsocode($stateIso);
             if (null !== $state) {
                 $frenchAddress->setStateId($state->getId());
                 $frenchAddress->save();
