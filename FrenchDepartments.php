@@ -35,7 +35,7 @@ class FrenchDepartments extends BaseModule
      *
      * @param ConnectionInterface|null $con
      */
-    public function postActivation(ConnectionInterface $con = null)
+    public function postActivation(ConnectionInterface $con = null): void
     {
         $franceCountryId = CountryQuery::create()
             ->filterByIsoalpha3('FRA')
